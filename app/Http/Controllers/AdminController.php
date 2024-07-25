@@ -39,4 +39,15 @@ class AdminController extends Controller
         WHERE id != '1'
         ");
     }
+    public function viewPrivilegedUsers()
+    {
+        $user_id = session("UserId");
+        return DB::select("SELECT
+        u.id,
+        CONCAT(u.first_name,' ',u.middle_name,' ',u.last_name) as full_name
+        FROM users as u
+        LEFT JOIN user_roles as ur on ur.user_id = u.id
+        WHERE ur.role_id IN ('2','3') AND u.id != '$user_id'
+        ");
+    }
 }

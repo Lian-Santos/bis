@@ -33,4 +33,5 @@ Route::middleware(['AuthUser:3'])->group(function () {
     Route::get('viewAdminableUsers', [AdminController::class, 'viewAdminableUsers']);
     Route::post('assignRole', [AdminController::class, 'assignRole']);
     Route::get('viewAssignableRoles', [AdminController::class, 'viewAssignableRoles']);
+    Route::get('viewPrivilegedUsers', [AdminController::class, 'viewPrivilegedUsers']);
 });
