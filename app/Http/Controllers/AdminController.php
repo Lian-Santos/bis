@@ -31,4 +31,12 @@ class AdminController extends Controller
             'msg' => 'user has been assigned new role'
         ],200);
     }
+    public function viewAssignableRoles()
+    {
+        return DB::select("SELECT
+        *
+        FROM roles
+        WHERE id != '1'
+        ");
+    }
 }
