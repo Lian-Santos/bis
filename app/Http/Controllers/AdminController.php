@@ -50,4 +50,16 @@ class AdminController extends Controller
         WHERE ur.role_id IN ('2','3') AND u.id != '$user_id'
         ");
     }
+    public function revokeAdminAccess(Request $request)
+    {
+        $user_id = $request->user_id;
+        DB::statement("UPDATE
+        user_roles
+        set role_id = '1'
+        WHERE user_id = '$user_id'
+        ");
+        return response()->json([
+            'msg' => 'Revoked user admin privileges'
+        ]);
+    }
 }
