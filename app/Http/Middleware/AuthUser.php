@@ -50,34 +50,12 @@ class AuthUser
             session(['Email' => $user[0]->Email]);
             session(['UserId' => $user[0]->Id]);
             session(['SessionRole' => $validate_token[0]->session_role_id]);
-            return $next($request);
+            session(['RoleId' => $user[0]->role_id]);
+            //return $next($request);
             $user_id = session('UserId');
-            session(['EmployeeCode' => $user[0]->EmployeeCode]);
-            if(count($role_check)>0)
-            {
-                session(['UserAccess' => $role_check[0]->access_option]);
-            }
-            /*
-            else
-            {
-                session(['UserAccess' => 'Employee']);
-            }
-            */
-            $role_raw = DB::table('dbo.Users as u')
-                ->where('u.Id','=',$user[0]->Id)
-                ->select(
-                    'u.role_id',
-                )
-                ->get();
-            session(['RoleId' => $role_raw[0]->role_id]);
-            $role = array_map(function($entry){return $entry->role_id;},json_decode($role_raw));
+            $role_raw = session('SessionRole');
 
-            if($userTypeArray[0] == 'User')
-            {
-                return $next($request);
-                //return response()->json(['message'=>'You do not have the necessary role for access for this API'],404);
-            }
-            else if(in_array(session('UserAccess'),$userTypeArray) && $user[0]->ExpiryDate > date('Y-m-d H:i:s') && $user[0]->role_status == 'Active'){
+            if(in_array(session('SessionRole'),$userTypeArray)){
                 return $next($request);
             }
             else{

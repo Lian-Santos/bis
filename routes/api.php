@@ -27,3 +27,9 @@ Route::middleware(['AuthUser:1'])->group(function () {
 Route::post('noVerificationRegistration', [UserController::class, 'noVerificationRegistration']);
 Route::post('manualLogin', [UserController::class, 'manualLogin']);
 Route::post('adminLogin', [UserController::class, 'adminLogin']);
+
+
+Route::middleware(['AuthUser:3'])->group(function () {
+    Route::get('viewAdminableUsers', [AdminController::class, 'viewAdminableUsers']);
+    Route::post('assignRole', [AdminController::class, 'assignRole']);
+});
