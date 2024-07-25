@@ -3,6 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\AdminController;
+
 
 
 /*
@@ -24,3 +26,4 @@ Route::middleware(['AuthUser:1'])->group(function () {
 });
 Route::post('noVerificationRegistration', [UserController::class, 'noVerificationRegistration']);
 Route::post('manualLogin', [UserController::class, 'manualLogin']);
+Route::post('adminLogin', [UserController::class, 'adminLogin']);

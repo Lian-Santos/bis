@@ -22,8 +22,11 @@ class AuthUser
 
         $userTypeArray = explode('-',$userType);
         $validate_token = DB::select("SELECT
-        user_id
-        FROM custom_tokens
+        ct.user_id,
+        ct.session_role_id,
+        r.role_type
+        FROM custom_tokens as ct
+        LEFT JOIN roles as r on r.id = ct.session_role_id
         WHERE token = '$bearer_token' and CAST(expires_at AS DATETIME) > CAST('$current_date_time' AS DATETIME)
         ");
         if(count($validate_token) < 1)
@@ -46,6 +49,7 @@ class AuthUser
         if(count($user) > 0){
             session(['Email' => $user[0]->Email]);
             session(['UserId' => $user[0]->Id]);
+            session(['SessionRole' => $validate_token[0]->session_role_id]);
             return $next($request);
             $user_id = session('UserId');
             session(['EmployeeCode' => $user[0]->EmployeeCode]);
