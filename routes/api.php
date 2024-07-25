@@ -2,6 +2,8 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -17,3 +19,8 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+Route::middleware(['AuthUser:1'])->group(function () {
+    Route::get('getUserDetails', [UserController::class, 'getUserDetails']);
+});
+Route::post('noVerificationRegistration', [UserController::class, 'noVerificationRegistration']);
+Route::post('manualLogin', [UserController::class, 'manualLogin']);
