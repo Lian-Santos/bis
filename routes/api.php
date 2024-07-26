@@ -4,6 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\BarangayOfficialController;
+
 
 
 
@@ -21,7 +23,7 @@ use App\Http\Controllers\AdminController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-Route::middleware(['AuthUser:1'])->group(function () {
+Route::middleware(['AuthUser:1-2-3'])->group(function () {
     Route::get('getUserDetails', [UserController::class, 'getUserDetails']);
 });
 Route::post('noVerificationRegistration', [UserController::class, 'noVerificationRegistration']);
@@ -35,4 +37,9 @@ Route::middleware(['AuthUser:3'])->group(function () {
     Route::post('revokeAdminAccess', [AdminController::class, 'revokeAdminAccess']);
     Route::get('viewAssignableRoles', [AdminController::class, 'viewAssignableRoles']);
     Route::get('viewPrivilegedUsers', [AdminController::class, 'viewPrivilegedUsers']);
+});
+Route::middleware(['AuthUser:2-3'])->group(function () {
+    Route::post('assignBarangayOfficial', [BarangayOfficialController::class, 'assignBarangayOfficial']);
+    Route::get('viewAssignableToBarangayOfficial', [BarangayOfficialController::class, 'viewAssignableToBarangayOfficial']);
+    Route::get('viewBarangayOfficials', [BarangayOfficialController::class, 'viewBarangayOfficials']);
 });
