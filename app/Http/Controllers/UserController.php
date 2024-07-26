@@ -21,7 +21,7 @@ class UserController extends Controller
         {
             return response()->json([
                 'error_msg' => 'Email already in use'
-            ],400);
+            ],401);
         }
         DB::statement("INSERT 
         INTO users
@@ -66,7 +66,7 @@ class UserController extends Controller
         {
             return response()->json([
                 'error_msg' => 'User with that email and password combination cannot be found'
-            ],400);
+            ],401);
         }
         $user_id = $user_details[0]->id;
         $token_value = hash('sha256', $user_id . $email . $current_date_time);
@@ -106,13 +106,13 @@ class UserController extends Controller
         {
             return response()->json([
                 'error_msg' => 'User with that email and password combination cannot be found'
-            ],400);
+            ],401);
         }
         if(!in_array($user_details[0]->role_id,['2','3']))
         {
             return response()->json([
                 'error_msg' => 'User has no admin role'
-            ],400);
+            ],401);
         }
         $role_id = $user_details[0]->role_id;
         $user_id = $user_details[0]->id;
@@ -152,6 +152,21 @@ class UserController extends Controller
         where u.id = '$user_id'
         ");
         return response()->json($user_details,200);
+    }
+    public function viewAllUsers()
+    {
+        $users = DB::select("SELECT
+        u.id,
+        u.Email,
+        u.first_name,
+        u.middle_name,
+        u.last_name,
+        CONCAT(u.first_name,' ',u.middle_name,'',u.last_name) as full_name,
+        CASE WHEN bo.id IS NOT NULL THEN 0 ELSE 1 END as assignable_brgy_official
+        FROM users as u
+        LEFT JOIN barangay_officials as bo on bo.user_id = u.id
+        ");
+        return response()->json($users,200);
     }
 
 }

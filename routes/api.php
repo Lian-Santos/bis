@@ -25,6 +25,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 Route::middleware(['AuthUser:1-2-3'])->group(function () {
     Route::get('getUserDetails', [UserController::class, 'getUserDetails']);
+    Route::get('viewBarangayOfficials', [BarangayOfficialController::class, 'viewBarangayOfficials']);
 });
 Route::post('noVerificationRegistration', [UserController::class, 'noVerificationRegistration']);
 Route::post('manualLogin', [UserController::class, 'manualLogin']);
@@ -40,6 +41,10 @@ Route::middleware(['AuthUser:3'])->group(function () {
 });
 Route::middleware(['AuthUser:2-3'])->group(function () {
     Route::post('assignBarangayOfficial', [BarangayOfficialController::class, 'assignBarangayOfficial']);
-    Route::get('viewAssignableToBarangayOfficial', [BarangayOfficialController::class, 'viewAssignableToBarangayOfficial']);
-    Route::get('viewBarangayOfficials', [BarangayOfficialController::class, 'viewBarangayOfficials']);
+    //Route::get('viewAssignableToBarangayOfficial', [BarangayOfficialController::class, 'viewAssignableToBarangayOfficial']);
+    Route::post('deleteBarangayOfficial', [BarangayOfficialController::class, 'deleteBarangayOfficial']);
+    Route::post('changeBarangayOfficialDetails', [BarangayOfficialController::class, 'changeBarangayOfficialDetails']);
+    Route::post('assignBarangayOfficial', [BarangayOfficialController::class, 'assignBarangayOfficial']);
+    Route::get('viewAllUsers', [UserController::class, 'viewAllUsers']);
+
 });

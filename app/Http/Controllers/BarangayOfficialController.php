@@ -23,13 +23,13 @@ class BarangayOfficialController extends Controller
         {
             return response()->json([
                 'error_msg' => 'User with specified id does not exist'
-            ],400);
+            ],401);
         }
         if(!is_null($user_details[0]->barangay_official_id))
         {
             return response()->json([
                 'error_msg' => 'User already has a barangay official entry'
-            ],400);
+            ],401);
         }
         $chairmanship = $request->chairmanship;
         $position = $request->position;
@@ -44,7 +44,7 @@ class BarangayOfficialController extends Controller
             'msg' => 'User has been assigned as a barangay official'
         ],200);
     }
-    public function viewAssignableToBarangayOfficial()
+    /*public function viewAssignableToBarangayOfficial()
     {
 
         return DB::select("SELECT
@@ -54,7 +54,7 @@ class BarangayOfficialController extends Controller
             LEFT JOIN barangay_officials as bo on bo.user_id = u.id
             where bo.id IS NULL
         ");
-    }
+    }*/
     public function viewBarangayOfficials()
     {
         $barangay_officials = DB::select("SELECT
@@ -68,5 +68,58 @@ class BarangayOfficialController extends Controller
         WHERE bo.id IS NOT NULL
         ");
         return response()->json($barangay_officials,200);
+    }
+    public function changeBarangayOfficialDetails(Request $request)
+    {
+        $new_status = $request->new_status;
+        $user_id = $request->user_id;
+        $update_string = 'SET ';
+        $update_string .= !is_null($request->chairmanship) ? "chairmanship = '$request->chairmanship'," : '';
+        $update_string .= !is_null($request->position) ? "position = '$request->position'," : '';
+        $update_string .= !is_null($request->status) ? "status = '$request->status'," : '';
+        $update_string = rtrim($update_string, ',');
+        $bo_details = DB::SELECT("SELECT
+        user_id,
+        status
+        FROM
+        barangay_officials
+        where user_id = '$user_id'
+        ");
+        if(count($bo_details) < 1)
+        {
+            return response()->json([
+                'error_msg' => 'Barangay official record does not exist'
+            ],401);
+        }
+        DB::statement("UPDATE
+        barangay_officials
+        $update_string
+        WHERE user_id = '$user_id'
+        ");
+        return response()->json([
+            'msg' => 'Barangay official record status has been changed'
+        ],200);
+    }
+    public function deleteBarangayOfficial(Request $request)
+    {
+        $user_id = $request->user_id;
+        $bo_details = DB::select("SELECT
+        *
+        FROM barangay_officials
+        WHERE user_id = '$user_id'
+        ");
+        if(count($bo_details) < 1)
+        {
+            return response()->json([
+                'error_msg' => 'Barangay official record does not exist'
+            ],401);
+        }
+        DB::statement("DELETE
+        FROM barangay_officials
+        WHERE user_id = '$user_id'
+        ");
+        return response([
+            'msg' => 'Barangay official record has been deleted'
+        ],200);
     }
 }
