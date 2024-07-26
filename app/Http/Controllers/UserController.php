@@ -62,8 +62,7 @@ class UserController extends Controller
             where email = '$email'
             "
         );
-
-        if(count($user_details) < 1 && !password_verify($pass, $user_details[0]->password))
+        if(count($user_details) < 1 || !password_verify($pass, $user_details[0]->password))
         {
             return response()->json([
                 'error_msg' => 'User with that email and password combination cannot be found'
