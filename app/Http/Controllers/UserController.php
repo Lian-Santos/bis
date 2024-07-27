@@ -10,8 +10,10 @@ class UserController extends Controller
     public function noVerificationRegistration(Request $request)
     {
         $email = $request->email;
-        $pass = $request->pass;
-        $encrypted_pass = password_hash($pass, PASSWORD_DEFAULT);
+        //$pass = $request->pass;
+        //$encrypted_pass = password_hash($pass, PASSWORD_DEFAULT);
+        $unencrypted_pass = $this->generatePassword(8);
+        $encrypted_pass = password_hash($unencrypted_pass, PASSWORD_DEFAULT);
         $exists_email = DB::select("
             SELECT *
             FROM users
@@ -45,7 +47,8 @@ class UserController extends Controller
         where us.email = '$request->email'
         ");
         return response()->json([
-            'msg' => 'Account created'
+            'msg' => 'Account created',
+            'new_password' => $unencrypted_pass
         ],200);
 
     }
@@ -167,6 +170,17 @@ class UserController extends Controller
         LEFT JOIN barangay_officials as bo on bo.user_id = u.id
         ");
         return response()->json($users,200);
+    }
+    function generatePassword($length = 8) {
+        $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        $count = mb_strlen($chars);
+    
+        for ($i = 0, $result = ''; $i < $length; $i++) {
+            $index = rand(0, $count - 1);
+            $result .= mb_substr($chars, $index, 1);
+        }
+    
+        return $result;
     }
 
 }
