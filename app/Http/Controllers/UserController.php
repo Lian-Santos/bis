@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use App\Rules\isPhNumber;
 use DB;
 
 class UserController extends Controller
@@ -12,6 +14,15 @@ class UserController extends Controller
         $email = $request->email;
         //$pass = $request->pass;
         //$encrypted_pass = password_hash($pass, PASSWORD_DEFAULT);
+        $validator = Validator::make($request->all(), [
+            'cell_number' => [new isPhNumber()],
+        ]);
+        
+        if ($validator->fails()) {
+            return response()->json([
+                'error_msg' => 'Phone number format needs to start with 09 and have a length of 11'
+            ]);
+        }
         $unencrypted_pass = $this->generatePassword(8);
         $encrypted_pass = password_hash($unencrypted_pass, PASSWORD_DEFAULT);
         $exists_email = DB::select("
@@ -27,7 +38,7 @@ class UserController extends Controller
         }
         DB::statement("INSERT 
         INTO users
-        (first_name,middle_name,last_name,email,email_verified_at,password)
+        (first_name,middle_name,last_name,email,email_verified_at,password,birthday,cell_number,civil_status_id)
         VALUES
         (
         '$request->first_name',
@@ -35,7 +46,10 @@ class UserController extends Controller
         '$request->last_name',
         '$request->email',
         NULL,
-        '$encrypted_pass'
+        '$encrypted_pass',
+        '$request->birthday',
+        '$request->cell_number',
+        '$request->civil_status_id'
         )
         ");
         DB::statement("INSERT
@@ -146,7 +160,7 @@ class UserController extends Controller
             u.first_name,
             u.middle_name,
             u.last_name,
-            CONCAT(u.first_name,' ',u.middle_name,'',u.last_name) as full_name,
+            CONCAT(u.first_name,' ',u.middle_name,' ',u.last_name) as full_name,
             r.role_type,
             '$current_session_role' as current_session_role
         FROM users as u
@@ -164,10 +178,17 @@ class UserController extends Controller
         u.first_name,
         u.middle_name,
         u.last_name,
-        CONCAT(u.first_name,' ',u.middle_name,'',u.last_name) as full_name,
-        CASE WHEN bo.id IS NOT NULL THEN 0 ELSE 1 END as assignable_brgy_official
+        u.civil_status_id,
+        ct.civil_status_type,
+        u.birthday,
+        DATE_FORMAT(FROM_DAYS(DATEDIFF(NOW(), u.birthday )), '%Y') + 0 AS age,
+        CONCAT(u.first_name,' ',u.middle_name,' ',u.last_name) as full_name,
+        CASE WHEN bo.id IS NOT NULL THEN 0 ELSE 1 END as assignable_brgy_official,
+        CASE WHEN ur.role_id IN ('2','3') THEN 0 ELSE 1 END as assignable_admin
         FROM users as u
         LEFT JOIN barangay_officials as bo on bo.user_id = u.id
+        LEFT JOIN user_roles as ur on ur.user_id = u.id
+        LEFT JOIN civil_status_types as ct on ct.id = u.civil_status_id
         ");
         return response()->json($users,200);
     }
@@ -182,5 +203,60 @@ class UserController extends Controller
     
         return $result;
     }
-
+    public function changeResidentInformation(Request $request)
+    {
+        $user_id = $request->user_id;
+        $update_string = 'SET ';
+        $update_string .= !is_null($request->first_name) ? "first_name = '$request->first_name'," : '';
+        $update_string .= !is_null($request->middle_name) ? "middle_name = '$request->middle_name'," : '';
+        $update_string .= !is_null($request->last_name) ? "last_name = '$request->last_name'," : '';
+        $update_string .= !is_null($request->email) ? "email = '$request->email'," : '';
+        $update_string .= !is_null($request->birthday) ? "birthday = '$request->birthday'," : '';
+        $update_string .= !is_null($request->cell_number) ? "cell_number = '$request->cell_number'," : '';
+        $update_string .= !is_null($request->civil_status_id) ? "civil_status_id = '$request->civil_status_id'," : '';
+        $update_string = rtrim($update_string, ',');
+        $bo_details = DB::SELECT("SELECT
+        user_id,
+        status
+        FROM
+        barangay_officials
+        where user_id = '$user_id'
+        ");
+        DB::statement("UPDATE
+        users
+        $update_string
+        WHERE id = '$user_id'
+        ");
+        return response()->json([
+            'msg' => 'Resident official record has been changed'
+        ],200);
+    }
+    public function deleteResidentInformation(Request $request)
+    {
+        $user_id = $request->user_id;
+        $user_exists = DB::select("SELECT
+        id
+        FROM users
+        WHERE id = '$user_id'");
+        if(count($user_exists) < 1)
+        {
+            return response()->json([
+                'error_msg' => 'User with id does not exist'
+            ],401);
+        }
+        DB::statement("DELETE
+        FROM users
+        WHERE id = '$user_id'
+        ");
+        return response()->json([
+            'msg' => 'User information has been deleted'
+        ]);
+    }
+    public function viewCivilStatusTypes()
+    {
+        return DB::select("SELECT
+        *
+        FROM civil_status_types
+        ");
+    }
 }

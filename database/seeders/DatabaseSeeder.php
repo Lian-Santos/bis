@@ -18,6 +18,18 @@ class DatabaseSeeder extends Seeder
         Values
         ('user'),('admin'),('super_admin')
         "); */
+        DB::statement("INSERT
+        INTO
+        civil_status_types 
+        (civil_status_type)
+        values ('Single'),('Married'),('Widowed'),('Legally Separated')
+        ");
+        $secret_123 = password_hash('secret123',PASSWORD_DEFAULT);
+        DB::statement("INSERT
+        INTO users
+        (first_name,middle_name,last_name,email,password,birthday,civil_status_id,cell_number)
+        VALUES 
+        ('Keanu','Wick','Reeves','keanu@gmail.com','$secret_123','1964-09-02','1','09450556683')");
         for ($x = 0; $x <= 10; $x++) {
         $user_id = DB::table('users')->insertGetId([
             'first_name' => fake()->firstName(),
@@ -25,6 +37,9 @@ class DatabaseSeeder extends Seeder
             'last_name' => fake()->lastName(),
             'email' => fake()->unique()->safeEmail(),
             'password' => password_hash(123, PASSWORD_DEFAULT),
+            'birthday' => $this->generateRandomBirthday(),
+            'civil_status_id' => rand(0,3),
+            'cell_number' => '09'. rand(100000000,999999999),
         ]);
         DB::table('user_roles')
             ->insert([
@@ -32,5 +47,26 @@ class DatabaseSeeder extends Seeder
                 'role_id' => 1
             ]);
         }
+        DB::table('roles')
+            ->insert([
+                [
+                    'role_type' => 'user'
+                ],
+                [
+                    'role_type' => 'admin'
+                ],
+                [
+                    'role_type' => 'super_admin'
+                ]
+            ]);
+    }
+
+    function generateRandomBirthday()
+    {
+        $min = strtotime("60 years ago");
+        $max = strtotime("18 years ago");
+        $rand_time = mt_rand($min, $max);
+        $birth_date = date('Y-m-d', $rand_time);
+        return $birth_date;
     }
 }

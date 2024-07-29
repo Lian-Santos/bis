@@ -7,6 +7,7 @@ use DB;
 
 class AdminController extends Controller
 {
+    /*
     public function viewAdminableUsers()
     {
         $adminable_users = DB::select("SELECT
@@ -18,6 +19,7 @@ class AdminController extends Controller
         ");
         return response()->json($adminable_users,200);
     }
+    */
     public function assignRole(Request $request)
     {
         $role_id = $request->role_id;
