@@ -358,4 +358,44 @@ class UserController extends Controller
             'access_token' => $token_value
         ],200);
     }
+    public function otpChangePassword(Request $request)
+    {
+        $current_date_time = date('Y-m-d H:i:s');
+        $otp = $request->otp;
+        $new_pass = $request->new_pass;
+        $email = $request->email;
+        $encrypted_pass = password_hash($new_pass,PASSWORD_DEFAULT);
+        $user_details = DB::select(
+            "SELECT
+            us.id,
+            us.password,
+            ur.role_id as role_id
+            FROM users as us
+            LEFT JOIN user_roles as ur on ur.user_id = us.id
+            LEFT JOIN otps as otp on otp.user_id = us.id
+            where email = '$email' and otp.otp = '$otp' and otp.status = 1
+            AND CAST(otp.expires_at AS DATETIME) > CAST('$current_date_time' AS DATETIME)
+            "
+        );
+        if(count($user_details) < 1)
+        {
+            return response()->json([
+                'error_msg' => 'User with that email and otp combination cannot be found'
+            ],401);
+        }
+        $user_id = $user_details[0]->id;
+        DB::statement("UPDATE
+        users
+        set password = '$encrypted_pass'
+        WHERE id = '$user_id'
+        ");
+        DB::statement("UPDATE
+        otps
+        set status = 0
+        WHERE otp = '$otp'
+        ");
+        return response()->json([
+            'msg' => 'password changed'
+        ],200);
+    }
 }
