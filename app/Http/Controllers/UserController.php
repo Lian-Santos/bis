@@ -25,8 +25,8 @@ class UserController extends Controller
                 'error_msg' => 'Phone number format needs to start with 09 and have a length of 11'
             ]);
         }
-        $unencrypted_pass = $this->generatePassword(8);
-        $encrypted_pass = password_hash($unencrypted_pass, PASSWORD_DEFAULT);
+        //$unencrypted_pass = $this->generatePassword(8);
+        //$encrypted_pass = password_hash($unencrypted_pass, PASSWORD_DEFAULT);
         $exists_email = DB::select("
             SELECT *
             FROM users
@@ -40,7 +40,7 @@ class UserController extends Controller
         }
         DB::statement("INSERT 
         INTO users
-        (first_name,middle_name,last_name,email,email_verified_at,password,birthday,cell_number,civil_status_id,male_female)
+        (first_name,middle_name,last_name,email,email_verified_at,birthday,cell_number,civil_status_id,male_female)
         VALUES
         (
         '$request->first_name',
@@ -48,11 +48,10 @@ class UserController extends Controller
         '$request->last_name',
         '$request->email',
         NULL,
-        '$encrypted_pass',
         '$request->birthday',
         '$request->cell_number',
-        '$request->civil_status_id'
-        'male_female',
+        '$request->civil_status_id',
+        '$request->male_female'
         )
         ");
         DB::statement("INSERT
@@ -65,7 +64,6 @@ class UserController extends Controller
         ");
         return response()->json([
             'msg' => 'Account created',
-            'new_password' => $unencrypted_pass
         ],200);
 
     }
