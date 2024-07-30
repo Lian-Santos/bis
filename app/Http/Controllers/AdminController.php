@@ -67,7 +67,15 @@ class AdminController extends Controller
     public function dashboardView()
     {
         $view = DB::select("SELECT
-        count(id)
+        count(id) as count_of_residents,
+        sum(CASE WHEN male_female = '0' THEN 1 ELSE 0 END) as males,
+        sum(CASE WHEN male_female = '1' THEN 1 ELSE 0 END) as females,
+        sum(CASE WHEN (DATE_FORMAT(FROM_DAYS(DATEDIFF(NOW(), birthday )), '%Y') + 0) >= 60 THEN 1 ELSE 0 END ) as count_of_seniors,
+        0 as schedules,
+        0 as unresolved,
+        0 as ongoing,
+        0 as settled,
+        0 as dismissed
         FROM users
         ");
         return $view;

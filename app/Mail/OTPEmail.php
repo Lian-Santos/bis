@@ -19,7 +19,11 @@ class OTPEmail extends Mailable
      */
     public function __construct($data)
     {
-        $this->name = $data['name'];
+        $this->first_name = $data['first_name'];
+        $this->middle_name = $data['middle_name'];
+        $this->last_name = $data['last_name'];
+        $this->email_address = $data['email_address'];
+        $this->otp = $data['otp'];
     }
 
     /**
@@ -28,7 +32,7 @@ class OTPEmail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            from: new Address('lianpaulsantos@gmail.com', 'BIS-APP'),
+            from: new Address('bisappct@gmail.com', 'BIS-APP'),
             subject: 'BIS OTP',
         );
     }
@@ -42,7 +46,10 @@ class OTPEmail extends Mailable
             view: 'emails.otp',
             with: [
                 'otp' => $this->otp,
-                'email' => $this->email
+                'email_address' => $this->email_address,
+                'first_name' => $this->first_name,
+                'middle_name' =>$this->middle_name,
+                'last_name' =>$this->last_name,
             ]
         );
     }

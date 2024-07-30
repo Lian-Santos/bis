@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('otp');
             $table->integer('user_id');
             $table->integer('status');
+            $table->timestamp('expires_at')->nullable();
             $table->timestamps();
 
         });

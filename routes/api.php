@@ -31,7 +31,8 @@ Route::middleware(['AuthUser:1-2-3'])->group(function () {
 Route::post('noVerificationRegistration', [UserController::class, 'noVerificationRegistration']);
 Route::post('manualLogin', [UserController::class, 'manualLogin']);
 Route::post('adminLogin', [UserController::class, 'adminLogin']);
-
+Route::post('generateOTP', [UserController::class, 'generateOTP']);
+Route::post('otpLogin', [UserController::class, 'otpLogin']);
 
 Route::middleware(['AuthUser:3'])->group(function () {
     Route::get('viewAdminableUsers', [AdminController::class, 'viewAdminableUsers']);
@@ -49,5 +50,6 @@ Route::middleware(['AuthUser:2-3'])->group(function () {
     Route::post('deleteResidentInformation', [UserController::class, 'deleteResidentInformation']);
     Route::post('assignBarangayOfficial', [BarangayOfficialController::class, 'assignBarangayOfficial']);
     Route::get('viewAllUsers', [UserController::class, 'viewAllUsers']);
+    Route::get('dashboardView', [AdminController::class, 'dashboardView']);
 });
 Route::get('testEmail', [UserController::class, 'testEmail']);

@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Rules\isPhNumber;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\WelcomeEmail;
+use App\Mail\OTPEmail;
 use DB;
 
 class UserController extends Controller
@@ -261,10 +262,100 @@ class UserController extends Controller
         FROM civil_status_types
         ");
     }
+    public function generateOTP(Request $request)
+    {
+        $current_date_time = date('Y-m-d H:i:s');
+        $user_details = DB::select("SELECT
+        u.id,
+        u.Email,
+        u.first_name,
+        u.middle_name,
+        u.last_name,
+        u.civil_status_id,
+        ct.civil_status_type,
+        u.male_female,
+        u.birthday,
+        DATE_FORMAT(FROM_DAYS(DATEDIFF(NOW(), u.birthday )), '%Y') + 0 AS age,
+        CONCAT(u.first_name,' ',u.middle_name,' ',u.last_name) as full_name,
+        CASE WHEN bo.id IS NOT NULL THEN 0 ELSE 1 END as assignable_brgy_official,
+        CASE WHEN ur.role_id IN ('2','3') THEN 0 ELSE 1 END as assignable_admin
+        FROM users as u
+        LEFT JOIN barangay_officials as bo on bo.user_id = u.id
+        LEFT JOIN user_roles as ur on ur.user_id = u.id
+        LEFT JOIN civil_status_types as ct on ct.id = u.civil_status_id
+        WHERE u.email = '$request->email'
+        ");
+        $user_id = $user_details[0]->id;
+        $otp = $this->generatePassword(6);
+        DB::statement("INSERT INTO
+        otps
+        (otp,user_id,status,expires_at)
+        VALUES
+        ('$otp','$user_id',1,date_add('$current_date_time',interval 5 minute))
+        ");
+        Mail::to('bisappct@gmail.com')->send(new OTPEmail([
+            'otp' => $otp,
+            'email_address' => $request->email,
+            'first_name' => $user_details[0]->first_name,
+            'middle_name' => $user_details[0]->middle_name,
+            'last_name' => $user_details[0]->last_name
+       ]));
+       return response()->json([
+        'msg' => 'OTP Generated. Check email'
+       ]);
+    }
     public function testEmail()
     {
         Mail::to('bisappct@gmail.com')->send(new WelcomeEmail([
             'name' => 'Johnathan',
        ]));
+    }
+    public function otpLogin(Request $request)
+    {
+        $current_date_time = date('Y-m-d H:i:s');
+        $otp = $request->otp;
+        $email = $request->email;
+        $user_details = DB::select(
+            "SELECT
+            us.id,
+            us.password,
+            ur.role_id as role_id
+            FROM users as us
+            LEFT JOIN user_roles as ur on ur.user_id = us.id
+            LEFT JOIN otps as otp on otp.user_id = us.id
+            where email = '$email' and otp.otp = '$otp' and otp.status = 1
+            AND CAST(otp.expires_at AS DATETIME) > CAST('$current_date_time' AS DATETIME)
+            "
+        );
+        if(count($user_details) < 1)
+        {
+            return response()->json([
+                'error_msg' => 'User with that email and otp combination cannot be found'
+            ],401);
+        }
+        $role_id = 1;
+        $user_id = $user_details[0]->id;
+        $token_value = hash('sha256', $user_id . $email . $current_date_time);
+        DB::statement("INSERT
+        INTO custom_tokens
+        (user_id,token,session_role_id,expires_at,created_at,updated_at)
+        VALUES
+        (
+        '$user_id',
+        '$token_value',
+        '$role_id',
+        date_add('$current_date_time',interval 30 minute),
+        '$current_date_time',
+        '$current_date_time'
+        )
+        ");
+        DB::statement("UPDATE
+        otps
+        set status = 0
+        WHERE otp = '$otp'
+        ");
+        return response()->json([
+            'access_token' => $token_value
+        ],200);
     }
 }

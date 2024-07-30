@@ -48,8 +48,9 @@
     <div class="container">
         
         <div class="message">
-            <p>Dear {{$name}},</p>
-            <p>Thank you for providing your details Your Company Name.
+            <p>Dear {{$first_name}},</p>
+            <p>Here is your OTP: {{$otp}}</p>
+            <p>Here is your email: {{$email_address}}</p>  
         </div>
         
     </div>
