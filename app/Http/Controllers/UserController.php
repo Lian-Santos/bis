@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Rules\isPhNumber;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\WelcomeEmail;
 use DB;
 
 class UserController extends Controller
@@ -38,7 +40,7 @@ class UserController extends Controller
         }
         DB::statement("INSERT 
         INTO users
-        (first_name,middle_name,last_name,email,email_verified_at,password,birthday,cell_number,civil_status_id)
+        (first_name,middle_name,last_name,email,email_verified_at,password,birthday,cell_number,civil_status_id,male_female)
         VALUES
         (
         '$request->first_name',
@@ -50,6 +52,7 @@ class UserController extends Controller
         '$request->birthday',
         '$request->cell_number',
         '$request->civil_status_id'
+        'male_female',
         )
         ");
         DB::statement("INSERT
@@ -180,6 +183,7 @@ class UserController extends Controller
         u.last_name,
         u.civil_status_id,
         ct.civil_status_type,
+        u.male_female,
         u.birthday,
         DATE_FORMAT(FROM_DAYS(DATEDIFF(NOW(), u.birthday )), '%Y') + 0 AS age,
         CONCAT(u.first_name,' ',u.middle_name,' ',u.last_name) as full_name,
@@ -258,5 +262,11 @@ class UserController extends Controller
         *
         FROM civil_status_types
         ");
+    }
+    public function testEmail()
+    {
+        Mail::to('bisappct@gmail.com')->send(new WelcomeEmail([
+            'name' => 'Johnathan',
+       ]));
     }
 }

@@ -19,9 +19,10 @@ return new class extends Migration
             $table->string('cell_number');
             $table->integer('civil_status_id');
             $table->datetime('birthday');
+            $table->integer('male_female');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
+            $table->string('password')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

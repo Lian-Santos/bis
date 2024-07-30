@@ -50,3 +50,4 @@ Route::middleware(['AuthUser:2-3'])->group(function () {
     Route::post('assignBarangayOfficial', [BarangayOfficialController::class, 'assignBarangayOfficial']);
     Route::get('viewAllUsers', [UserController::class, 'viewAllUsers']);
 });
+Route::get('testEmail', [UserController::class, 'testEmail']);

@@ -64,4 +64,12 @@ class AdminController extends Controller
             'msg' => 'Revoked user admin privileges'
         ]);
     }
+    public function dashboardView()
+    {
+        $view = DB::select("SELECT
+        count(id)
+        FROM users
+        ");
+        return $view;
+    }
 }

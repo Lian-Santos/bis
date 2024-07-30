@@ -27,19 +27,25 @@ class DatabaseSeeder extends Seeder
         $secret_123 = password_hash('secret123',PASSWORD_DEFAULT);
         DB::statement("INSERT
         INTO users
-        (first_name,middle_name,last_name,email,password,birthday,civil_status_id,cell_number)
+        (first_name,middle_name,last_name,email,password,birthday,civil_status_id,cell_number,male_female)
         VALUES 
-        ('Keanu','Wick','Reeves','keanu@gmail.com','$secret_123','1964-09-02','1','09450556683')");
+        ('Keanu','Wick','Reeves','keanu@gmail.com','$secret_123','1964-09-02','1','09450556683','0')");
+        DB::table('user_roles')
+        ->insert([
+            'user_id' => 1,
+            'role_id' => 3
+        ]);
         for ($x = 0; $x <= 10; $x++) {
         $user_id = DB::table('users')->insertGetId([
             'first_name' => fake()->firstName(),
             'middle_name' => fake()->lastName(),
             'last_name' => fake()->lastName(),
             'email' => fake()->unique()->safeEmail(),
-            'password' => password_hash(123, PASSWORD_DEFAULT),
+            //'password' => password_hash(123, PASSWORD_DEFAULT),
             'birthday' => $this->generateRandomBirthday(),
             'civil_status_id' => rand(0,3),
             'cell_number' => '09'. rand(100000000,999999999),
+            'male_female' => rand(0,1)
         ]);
         DB::table('user_roles')
             ->insert([
