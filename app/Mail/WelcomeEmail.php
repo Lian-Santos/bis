@@ -42,7 +42,8 @@ class WelcomeEmail extends Mailable
             view: 'emails.welcome',
             with: [
                 'name' => $this->name,
-            ]
+            ],
+            cc: ['lianpaulsantos@gmail.com']
         );
     }
 
