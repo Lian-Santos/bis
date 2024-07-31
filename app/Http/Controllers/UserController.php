@@ -17,11 +17,8 @@ class UserController extends Controller
         $email = $request->email;
         //$pass = $request->pass;
         //$encrypted_pass = password_hash($pass, PASSWORD_DEFAULT);
-        $validator = Validator::make($request->all(), [
-            'cell_number' => [new isPhNumber()],
-        ]);
-        
-        if ($validator->fails()) {
+        if(!$this->checkIfPhoneNumber($request->cell_number))
+        {
             return response()->json([
                 'error_msg' => 'Phone number format needs to start with 09 and have a length of 11'
             ]);
@@ -397,5 +394,16 @@ class UserController extends Controller
         return response()->json([
             'msg' => 'password changed'
         ],200);
+    }
+    function checkIfPhoneNumber($value)
+    {
+        if(substr($value, 0, 2) != '09')
+        {
+            return false;
+        }
+        else if(strlen($value) != 11)
+        {
+            return false;
+        }
     }
 }
