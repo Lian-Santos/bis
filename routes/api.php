@@ -29,6 +29,7 @@ Route::middleware(['AuthUser:1-2-3'])->group(function () {
     Route::get('viewBarangayOfficials', [BarangayOfficialController::class, 'viewBarangayOfficials']);
 });
 Route::post('noVerificationRegistration', [UserController::class, 'noVerificationRegistration']);
+Route::post('testString', [DocumentController::class, 'testString']);
 Route::post('manualLogin', [UserController::class, 'manualLogin']);
 Route::post('adminLogin', [UserController::class, 'adminLogin']);
 Route::post('generateOTP', [UserController::class, 'generateOTP']);
