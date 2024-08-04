@@ -21,12 +21,15 @@ class UserController extends Controller
         $email = $request->email;
         //$pass = $request->pass;
         //$encrypted_pass = password_hash($pass, PASSWORD_DEFAULT);
+        //return strlen($request->cell_number);
+        /*
         if(!$this->checkIfPhoneNumber($request->cell_number))
         {
             return response()->json([
                 'error_msg' => 'Phone number format needs to start with 09 and have a length of 11'
             ]);
         }
+            */
         //$unencrypted_pass = $this->generatePassword(8);
         //$encrypted_pass = password_hash($unencrypted_pass, PASSWORD_DEFAULT);
         $exists_email = DB::select("
