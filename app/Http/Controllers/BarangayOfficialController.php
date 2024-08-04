@@ -60,10 +60,16 @@ class BarangayOfficialController extends Controller
     }*/
     public function viewBarangayOfficials(Request $request)
     {
-        $item_per_page = $request->item_per_page;
+        $item_per_page = "";
+        $item_per_page_limit ="";
+        $offset = 0;
         $page_number = $request->page_number;
-
-        $offset = $item_per_page * ($page_number - 1);
+        if($request->item_per_page)
+        {
+            $item_per_page = $request->item_per_page;
+            $offset = $item_per_page * ($page_number - 1);
+            $item_per_page_limit = "LIMIT $request->item_per_page";
+        }
         $offset_value = '';
         if($offset != 0)
         {
@@ -86,7 +92,7 @@ class BarangayOfficialController extends Controller
         LEFT JOIN users as u on bo.user_id = u.id
         $search_value
         ORDER BY bo.id
-        LIMIT $item_per_page
+        $item_per_page_limit
         $offset_value
         ");
         return response()->json($barangay_officials,200);
