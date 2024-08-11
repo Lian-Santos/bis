@@ -366,6 +366,7 @@ class UserController extends Controller
         LEFT JOIN civil_status_types as ct on ct.id = u.civil_status_id
         WHERE u.email = '$request->email' AND u.birthday = '$request->birthday'
         ");
+        $user_id = $user_details[0]->id;
         if(count($user_details)<1)
         {
             return response()->json([
@@ -373,7 +374,13 @@ class UserController extends Controller
                 'error_msg' => 'A user with this email and birthday does not exist'
             ]);
         }
-        $user_id = $user_details[0]->id;
+        if($user_details[0]->Email == 'lucie41@example.com')
+        {
+            return response()->json([
+                'error' => true,
+                'error_msg'=> 'You currently have a blotter report against you. Please resolve at the barangay hall'
+            ]);
+        }
         $otp = $this->generateOTPString(6);
         DB::statement("INSERT INTO
         otps
