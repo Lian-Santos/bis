@@ -42,8 +42,9 @@ class UserController extends Controller
         {
             return response()->json([
                 'error_msg' => 'Email already in use',
-                'success' => false
-            ],401);
+                'success' => false,
+                'error' => true
+            ],200);
         }
         DB::statement("INSERT 
         INTO users
