@@ -42,9 +42,8 @@ class UserController extends Controller
         {
             return response()->json([
                 'error_msg' => 'Email already in use',
-                'success' => false,
-                'error' => true
-            ],200);
+                'success' => false
+            ],401);
         }
         DB::statement("INSERT 
         INTO users
@@ -97,9 +96,8 @@ class UserController extends Controller
         if(count($user_details) < 1 || !password_verify($pass, $user_details[0]->password))
         {
             return response()->json([
-                'error_msg' => 'User with that email and password combination cannot be found',
-                'error' => true
-            ],200);
+                'error_msg' => 'User with that email and password combination cannot be found'
+            ],401);
         }
         $user_id = $user_details[0]->id;
         $token_value = hash('sha256', $user_id . $email . $current_date_time);
@@ -139,16 +137,14 @@ class UserController extends Controller
         if(count($user_details) < 1 || !password_verify($pass, $user_details[0]->password))
         {
             return response()->json([
-                'error_msg' => 'User with that email and password combination cannot be found',
-                'error' => true
-            ],200);
+                'error_msg' => 'User with that email and password combination cannot be found'
+            ],401);
         }
         if(!in_array($user_details[0]->role_id,['2','3']))
         {
             return response()->json([
-                'error_msg' => 'User has no admin role',
-                'error' => true
-            ],200);
+                'error_msg' => 'User has no admin role'
+            ],401);
         }
         $role_id = $user_details[0]->role_id;
         $user_id = $user_details[0]->id;
@@ -327,9 +323,8 @@ class UserController extends Controller
         {
             return response()->json([
                 'error_msg' => 'User with id does not exist',
-                'success' => false,
-                'error' => true
-            ],200);
+                'success' => false
+            ],401);
         }
         DB::statement("DELETE
         FROM users
@@ -432,9 +427,8 @@ class UserController extends Controller
         {
             return response()->json([
                 'error_msg' => 'User with that email and otp combination cannot be found',
-                'success' => false,
-                'error' => true
-            ],200);
+                'success' => false
+            ],401);
         }
         $role_id = 1;
         $user_id = $user_details[0]->id;
@@ -485,9 +479,8 @@ class UserController extends Controller
         {
             return response()->json([
                 'error_msg' => 'User with that email and otp combination cannot be found',
-                'success' => false,
-                'error' => true
-            ],200);
+                'success' => false
+            ],401);
         }
         $user_id = $user_details[0]->id;
         DB::statement("UPDATE
