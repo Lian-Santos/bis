@@ -188,6 +188,8 @@ class UserController extends Controller
     }
     public function viewAllUsers(Request $request)
     {
+        
+        $user_id = session("UserId");
         /*
         $item_per_page = $request->item_per_page;
         $page_number = $request->page_number;
@@ -225,9 +227,9 @@ class UserController extends Controller
         $search_value = '';
         if($request->search_value)
         {
-            $search_value = "WHERE first_name like '%$request->search_value%' OR ".
+            $search_value = "AND (first_name like '%$request->search_value%' OR ".
             "middle_name like '%$request->search_value%' OR " .
-            "last_name like '%$request->search_value%'";
+            "last_name like '%$request->search_value%')";
         }
 
 
@@ -250,6 +252,7 @@ class UserController extends Controller
         FROM(
         SELECT *
         FROM users
+        WHERE id != '$user_id'
         $search_value
         ORDER BY id
         $item_per_page_limit
@@ -259,7 +262,18 @@ class UserController extends Controller
         LEFT JOIN user_roles as ur on ur.user_id = u.id
         LEFT JOIN civil_status_types as ct on ct.id = u.civil_status_id
         ");
-        return response()->json($users,200);
+
+        $total_pages = DB::select("SELECT
+        count(id) as page_count
+        FROM users
+        WHERE id != '$user_id'
+        $search_value
+        ORDER BY id
+        ")[0]->page_count;
+
+        $total_pages = ceil($total_pages/$item_per_page);
+        return response()->json(['data'=>$users,'current_page'=>$page_number,'total_pages'=>$total_pages],200);
+        //return response()->json($users,200);
     }
     function generatePassword($length = 8) {
         $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
