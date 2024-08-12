@@ -190,7 +190,7 @@ class AdminController extends Controller
             return response()->json([
                 'error' => true,
                 'error_msg' => 'You need to set either the user_id or appointment_id parameter'
-            ],401);
+            ],200);
         }
         return DB::select("SELECT
                 id,
