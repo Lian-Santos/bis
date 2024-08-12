@@ -533,8 +533,7 @@ class UserController extends Controller
         $status = 'Pending';
         $user_id = session("UserId");
         $date_now = date('Y-m-d H:i:s');
-        $files = $request->file('file_upload');
-        if($files == '' || !$files || count($files) < 1)
+        if(count($request->file_upload) < 1)
         {
             return response()->json([
                 'error' => true,
