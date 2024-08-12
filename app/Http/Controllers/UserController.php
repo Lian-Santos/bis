@@ -427,7 +427,8 @@ class UserController extends Controller
         {
             return response()->json([
                 'error_msg' => 'User with that email and otp combination cannot be found',
-                'success' => false
+                'success' => false,
+                'error' => true
             ],401);
         }
         $role_id = 1;
@@ -533,9 +534,16 @@ class UserController extends Controller
         $user_id = session("UserId");
         $date_now = date('Y-m-d H:i:s');
         $files = $request->file('file_upload');
-
+        if($files == '' || !$files || count($files) < 1)
+        {
+            return response()->json([
+                'error' => true,
+                'error_msg' => 'There are no files attached',
+                'success' => false
+            ],200);
+        }
         //$file = $request->file('file_upload');
-    
+        
         // Get the file contents
         
         $appointment_id = DB::table('appointments')
