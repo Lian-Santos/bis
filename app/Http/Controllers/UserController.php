@@ -285,7 +285,7 @@ class UserController extends Controller
     }
     public function changeResidentInformation(Request $request)
     {
-        $user_id = $request->user_id;
+        $user_id = $request->id;
         $update_string = 'SET ';
         $update_string .= !is_null($request->first_name) ? "first_name = '$request->first_name'," : '';
         $update_string .= !is_null($request->middle_name) ? "middle_name = '$request->middle_name'," : '';
@@ -294,6 +294,7 @@ class UserController extends Controller
         $update_string .= !is_null($request->birthday) ? "birthday = '$request->birthday'," : '';
         $update_string .= !is_null($request->cell_number) ? "cell_number = '$request->cell_number'," : '';
         $update_string .= !is_null($request->civil_status_id) ? "civil_status_id = '$request->civil_status_id'," : '';
+        $update_string .= !is_null($request->male_female) ? "male_female = '$request->male_female'," : '';
         $update_string = rtrim($update_string, ',');
         $bo_details = DB::SELECT("SELECT
         user_id,
