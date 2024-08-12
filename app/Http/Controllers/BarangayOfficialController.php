@@ -23,15 +23,17 @@ class BarangayOfficialController extends Controller
         {
             return response()->json([
                 'error_msg' => 'User with specified id does not exist',
-                'success' => false
-            ],401);
+                'success' => false,
+                'error' => true
+            ],200);
         }
         if(!is_null($user_details[0]->barangay_official_id))
         {
             return response()->json([
                 'error_msg' => 'User already has a barangay official entry',
-                'success' => false
-            ],401);
+                'success' => false,
+                'error' => true
+            ],200);
         }
         $chairmanship = $request->chairmanship;
         $position = $request->position;
@@ -125,8 +127,9 @@ class BarangayOfficialController extends Controller
         {
             return response()->json([
                 'error_msg' => 'Barangay official record does not exist',
-                'success' => false
-            ],401);
+                'success' => false,
+                'error' => true
+            ],200);
         }
         DB::statement("UPDATE
         barangay_officials
@@ -150,8 +153,9 @@ class BarangayOfficialController extends Controller
         {
             return response()->json([
                 'error_msg' => 'Barangay official record does not exist',
-                'success' => false
-            ],401);
+                'success' => false,
+                'error' => true
+            ],200);
         }
         DB::statement("DELETE
         FROM barangay_officials
