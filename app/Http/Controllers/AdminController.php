@@ -146,6 +146,7 @@ class AdminController extends Controller
         }
         $appointments = DB::select("SELECT
                 apt.id as appointment_id,
+                u.id as user_id,
                 CONCAT(u.first_name,' ',u.middle_name,' ',u.last_name) as full_name,
                 apt.document_type_id,
                 doc_type.service as document_type,
