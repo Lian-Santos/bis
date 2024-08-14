@@ -73,4 +73,6 @@ Route::middleware(['AuthUser:2-3'])->group(function () {
     Route::post('uploadIdPicture', [AdminController::class, 'uploadIdPicture']);
     Route::get('generatePdf', [AdminController::class, 'generatePdf']);
     Route::post('applyNewResident', [UserController::class, 'applyNewResident']);
+    Route::post('importExcelResidents', [NewResidentController::class, 'importExcelResidents']);
+
     
