@@ -68,11 +68,11 @@ Route::middleware(['AuthUser:2-3'])->group(function () {
     Route::post('approveNewResident', [NewResidentController::class, 'approveNewResident']);
     Route::post('fileBlotterReport', [BlotterController::class, 'fileBlotterReport']);
     Route::post('editBlotterReport', [BlotterController::class, 'editBlotterReport']);
+    Route::post('importExcelResidents', [NewResidentController::class, 'importExcelResidents']);
+
 });
     Route::get('testEmail', [UserController::class, 'testEmail']);
     Route::post('uploadIdPicture', [AdminController::class, 'uploadIdPicture']);
     Route::get('generatePdf', [AdminController::class, 'generatePdf']);
     Route::post('applyNewResident', [UserController::class, 'applyNewResident']);
-    Route::post('importExcelResidents', [NewResidentController::class, 'importExcelResidents']);
-
     
