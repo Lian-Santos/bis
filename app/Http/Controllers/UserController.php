@@ -334,7 +334,7 @@ class UserController extends Controller
         u.id,
         u.Email,
         u.first_name,
-        u.middle_name,
+        CASE WHEN u.middle_name IS NULL THEN '' ELSE u.middle_name END as middle_name
         u.last_name,
         u.civil_status_id,
         ct.civil_status_type,
