@@ -493,7 +493,7 @@ class UserController extends Controller
         LEFT JOIN civil_status_types as ct on ct.id = u.civil_status_id
         WHERE u.email = '$request->email' AND u.birthday = '$request->birthday'
         ");
-        return $user_details[0];
+        //return $user_details[0];
         if(count($user_details)<1)
         {
             return response()->json([
