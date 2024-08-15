@@ -356,7 +356,7 @@ class UserController extends Controller
                 ) SEPARATOR ','
             ),
             ']'
-        )
+            )   
             FROM supporting_files
             WHERE user_id = u.id
         ) as supporting_files_obj,
@@ -384,6 +384,16 @@ class UserController extends Controller
             if($user->supporting_files_obj)
             {
                 $user->supporting_files_obj = json_decode($user->supporting_files_obj);
+                $array = DB::table('supporting_files')
+                    ->select(
+                        'base64_file'
+                    )
+                    ->where('user_id','=',$user->id)
+                    ->get();
+                foreach($user->supporting_files_obj as $index => $file)
+                {
+                    $file->base64_file = $array[$index]->base64_file;
+                }
             }
             else
             {
