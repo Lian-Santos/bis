@@ -370,14 +370,13 @@ class UserController extends Controller
         FROM users
         WHERE id != '$user_id'
         $search_value
-        ORDER BY id
+        ORDER BY isPendingResident DESC,id ASC
         $item_per_page_limit
         $offset_value
         ) as u
         LEFT JOIN barangay_officials as bo on bo.user_id = u.id
         LEFT JOIN user_roles as ur on ur.user_id = u.id
         LEFT JOIN civil_status_types as ct on ct.id = u.civil_status_id
-        ORDER BY u.isPendingResident DESC
         ");
         foreach($users as $user)
         {   
