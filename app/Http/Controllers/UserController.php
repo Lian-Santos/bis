@@ -359,7 +359,7 @@ class UserController extends Controller
         )
             FROM supporting_files
             WHERE user_id = u.id
-        ) as supporting_file_obj,
+        ) as supporting_files_obj,
         u.isPendingResident,
         DATE_FORMAT(FROM_DAYS(DATEDIFF(NOW(), u.birthday )), '%Y') + 0 AS age,
         CONCAT(u.first_name, (CASE WHEN u.middle_name = '' THEN '' ELSE ' ' END),u.middle_name,' ',u.last_name) as full_name,
@@ -382,7 +382,14 @@ class UserController extends Controller
         foreach($users as $user)
         {   
             //$string_val = str_replace("'", '"', $user->supporting_file_obj);
-            $user->supporting_file_obj = json_decode($user->supporting_file_obj);
+            if($user->supporting_files_obj)
+            {
+                $user->supporting_files_obj = json_decode($user->supporting_files_obj);
+            }
+            else
+            {
+                $user->supporting_files_obj = [];
+            }
         }
         $total_pages = DB::select("SELECT
         count(id) as page_count
