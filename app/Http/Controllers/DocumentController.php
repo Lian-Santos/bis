@@ -9,6 +9,11 @@ class DocumentController extends Controller
     public function addDocumentType(Request $request)
     {
         $service = $request->service;
+        $price = 0;
+        if(!is_null($request->price))
+        {
+            $price = $request->price;
+        }
         $description = $request->description;
         $isCertificate = 1;
         if($request->isCertificate)
@@ -20,7 +25,8 @@ class DocumentController extends Controller
                 'service' => $service,
                 'description' => $description,
                 'isCertificate' => $isCertificate,
-                'created_at' => date('Y-m-d H:i:s')
+                'created_at' => date('Y-m-d H:i:s'),
+                'price' => $price
             ]);
         /*
         DB::statement("INSERT
