@@ -697,6 +697,11 @@ class UserController extends Controller
     }
     function createAppointment(Request $request)
     {
+        $purpose = '';
+        if($request->purpose)
+        {
+            $purpose = $request->purpose;
+        }
         $api_token = $request->header('Authorization');
         $new_string = str_replace('Bearer ','',$api_token);
         $otp_used =  DB::table('custom_tokens')
@@ -725,7 +730,9 @@ class UserController extends Controller
                 'user_id' => $user_id,
                 'schedule_date' => $schedule_date,
                 'status' => $status,
-                'otp_used' => $otp_used
+                'otp_used' => $otp_used,
+                'purpose' => $purpose,
+                'created_at' => $date_now,
             ]);
         //if ($request->hasFile('file_upload')) {
         //    foreach ($files as $file) {
