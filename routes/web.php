@@ -12,8 +12,8 @@ use App\Http\Controllers\UserController;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-/*
+
 Route::get('/', function () {
     return view('welcome');
-});*/
-Route::get('/', [UserController::class, 'showViewDoc']);
+});
+//Route::get('/', [UserController::class, 'showViewDoc']);
