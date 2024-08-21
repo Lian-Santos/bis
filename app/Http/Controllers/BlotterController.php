@@ -138,7 +138,7 @@ class BlotterController extends Controller
         br.id,
         br.complainee_name,
         br.admin_id,
-        br.complainant_id,
+        br.complainant_name,
         br.complaint_remarks,
         br.status_resolved,
         br.created_at,
