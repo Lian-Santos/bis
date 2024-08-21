@@ -246,7 +246,7 @@ class HistoryController extends Controller
         // Write the file to a temporary location
         $writer = new Xlsx($spreadsheet);
         
-        $fileName = 'Blotter-Reports.xlsx';
+        $fileName = 'User-List.xlsx';
 
         $response = new StreamedResponse(function() use ($writer) {
             $writer->save('php://output');
