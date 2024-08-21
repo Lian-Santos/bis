@@ -121,7 +121,7 @@ class HistoryController extends Controller
         ) as br
         LEFT JOIN users as cu on cu.id = br.admin_id
         $search_value
-        ORDER BY br.id
+        ORDER BY br.id DESC
         ");
 
 
