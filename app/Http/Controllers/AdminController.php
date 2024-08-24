@@ -160,6 +160,7 @@ class AdminController extends Controller
             $search_value = "AND (u.first_name like '%$request->search_value%' OR ".
             "u.middle_name like '%$request->search_value%' OR " .
             "u.last_name like '%$request->search_value%' OR " .
+            "apt.id = '$request->search_value' OR " .
             "apt.otp_used like '%$request->search_value%'" .
             
             ")";
