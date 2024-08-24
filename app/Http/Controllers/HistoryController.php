@@ -110,7 +110,12 @@ class HistoryController extends Controller
         br.id as 'No.',
         br.complainee_name as 'Complainee',
         br.complaint_remarks as Remarks,
-        CASE WHEN br.status_resolved = 0 THEN 'Ongoing' ELSE 'Resolved' END as Status,
+        CASE 
+        WHEN br.status_resolved = 0 THEN 'Ongoing'
+        WHEN br.status_resolved = 1 THEN 'Settled'
+        WHEN br.status_resolved = 2 THEN 'Unresolved'
+        WHEN br.status_resolved = 3 THEN 'Dismissed'
+        END as Status,
         br.created_at as 'Requested On',
         br.complainant_name as Complainant,
         CONCAT(cu.first_name, (CASE WHEN cu.middle_name = '' THEN '' ELSE ' ' END),cu.middle_name,' ',cu.last_name) as 'Admin Name'
