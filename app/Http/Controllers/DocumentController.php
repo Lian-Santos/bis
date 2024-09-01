@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use DB;
+require_once app_path('Helpers/helpers.php');
 class DocumentController extends Controller
 {
     public function addDocumentType(Request $request)
@@ -20,8 +21,8 @@ class DocumentController extends Controller
         {
             $isCertificate = $request->isCertificate;
         }
-        DB::table('document_types')
-            ->insert([
+        $doc_id = DB::table('document_types')
+            ->insertGetId([
                 'service' => $service,
                 'description' => $description,
                 'isCertificate' => $isCertificate,
@@ -35,6 +36,7 @@ class DocumentController extends Controller
         VALUES ('$service','$description')
         ");
         */
+        createAuditLog(session('UserId'),'Document Type Added',$doc_id,'added');
         return response()->json([
             'msg' => 'New document type added',
             'success' => true
@@ -48,6 +50,7 @@ class DocumentController extends Controller
         document_types
         WHERE id = '$document_type_id'
         ");
+        createAuditLog(session('UserId'),'Document Type Deleted',$document_type_id,'deleted');
         return response()->json([
             'msg' => 'Document type has been deleted',
             'success' => true
@@ -114,9 +117,11 @@ class DocumentController extends Controller
                     'description' => $request->description
                 ]);
         }
+        createAuditLog(session('UserId'),'Document Type Updated',$request->doc_id,'updated');
         return response()->json([
             'msg' => 'Document edited',
             'success' => true
+            
         ],200);
     }
     public function testString(Request $request)
