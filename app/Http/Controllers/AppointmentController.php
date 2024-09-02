@@ -67,7 +67,7 @@ class AppointmentController extends Controller
                 ->update([
                     'status' => 'Released'
                 ]);
-            createAuditLog(session('UserId'), 'Appointment Released' ,$request->appointment_id,'released');
+            //createAuditLog(session('UserId'), 'Appointment Released' ,$request->appointment_id,'released');
             if(is_null($appointment_deets[0]->updated_at))
             {
                 DB::table('appointments')
