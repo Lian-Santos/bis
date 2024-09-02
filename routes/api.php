@@ -76,7 +76,6 @@ Route::middleware(['AuthUser:2-3'])->group(function () {
     Route::post('noVerificationRegistration', [UserController::class, 'noVerificationRegistration']); //addbearer
     Route::get('viewAdminLogs', [AdminController::class, 'viewAdminLogs']);
 });
-    Route::get('downloadAndReleaseDocument', [AppointmentController::class, 'downloadAndReleaseDocument']);
     Route::get('testEmail', [UserController::class, 'testEmail']);
     Route::post('uploadIdPicture', [AdminController::class, 'uploadIdPicture']);
     Route::get('generatePdf', [AdminController::class, 'generatePdf']);
@@ -84,4 +83,5 @@ Route::middleware(['AuthUser:2-3'])->group(function () {
     Route::get('downloadAppointments', [HistoryController::class, 'downloadAppointments']);
     Route::get('downloadBlotters', [HistoryController::class, 'downloadBlotters']);
     Route::get('downloadUsers', [HistoryController::class, 'downloadUsers']);
+    Route::get('downloadAndReleaseDocument', [AppointmentController::class, 'downloadAndReleaseDocument']);
     
