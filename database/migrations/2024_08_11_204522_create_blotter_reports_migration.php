@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('complainee_id')->nullable();
             $table->integer('admin_id');
             $table->longText('complaint_file')->nullable();
+            $table->string('officer_on_duty')->nullable();
             $table->text('complaint_remarks');
             $table->boolean('status_resolved');
             $table->timestamps();

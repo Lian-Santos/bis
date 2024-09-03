@@ -49,7 +49,8 @@ class BlotterController extends Controller
                 //'complaint_file' => $complaint_file,
                 'created_at' => $current_date,
                 'updated_at' => $current_date,
-                'status_resolved' => $status_resolved
+                'status_resolved' => $status_resolved,
+                'officer_on_duty' => $request->officer_on_duty
             ]);
         return response()->json([
             'msg' => 'A blotter report has been filed',
@@ -85,7 +86,8 @@ class BlotterController extends Controller
                 'admin_id' => $admin_id,
                 'complaint_remarks' => $complaint_remarks,
                 'updated_at' => $current_date,
-                'status_resolved' => $status_resolved
+                'status_resolved' => $status_resolved,
+                'officer_on_duty' => $request->officer_on_duty
             ]);
             /*
         if($request->base64_file)
@@ -167,6 +169,7 @@ class BlotterController extends Controller
         br.created_at,
         br.complainant_name,
         CONCAT(au.first_name, (CASE WHEN au.middle_name = '' THEN '' ELSE ' ' END),au.middle_name,' ',au.last_name) as admin_name,
+        br.officer_on_duty,
         CASE WHEN br.complainee_id IS NULL THEN 0 ELSE 1 END as is_complainee_resident
 
         FROM(
