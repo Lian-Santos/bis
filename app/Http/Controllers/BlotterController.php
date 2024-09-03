@@ -172,7 +172,6 @@ class BlotterController extends Controller
         br.complaint_remarks,
         br.status_resolved,
         br.created_at,
-        br.complainant_name,
         CONCAT(au.first_name, (CASE WHEN au.middle_name = '' THEN '' ELSE ' ' END),au.middle_name,' ',au.last_name) as admin_name,
         br.officer_on_duty,
         CASE WHEN br.complainee_id IS NULL THEN 0 ELSE 1 END as is_complainee_resident,
