@@ -281,6 +281,7 @@ class AdminController extends Controller
         }
 
         $data = DB::select("SELECT
+            al.id,
             CONCAT(au.first_name, (CASE WHEN au.middle_name = '' THEN '' ELSE ' ' END),au.middle_name,' ',au.last_name) as admin_name,
             al.action_taker_id,
             al.action_type,
@@ -291,7 +292,7 @@ class AdminController extends Controller
             LEFT JOIN users as au on au.id = al.action_taker_id
             WHERE al.id > 0
             $search_value
-            ORDER BY created_at DESC
+            ORDER BY created_at DESC, al.id DESC
             $item_per_page_limit
             $offset_value
         ");
@@ -302,7 +303,7 @@ class AdminController extends Controller
         LEFT JOIN users as au on au.id = al.action_taker_id
         WHERE al.id > 0
         $search_value
-        ORDER BY al.created_at DESC
+        ORDER BY al.created_at DESC, al.id DESC
         ")[0]->page_count;
         
         $total_pages = ceil($total_pages/$item_per_page);
