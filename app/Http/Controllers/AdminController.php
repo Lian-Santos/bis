@@ -85,6 +85,7 @@ class AdminController extends Controller
         (SELECT count(id) FROM blotter_reports WHERE status_resolved = 2) as unresolved,
         (SELECT count(id) FROM blotter_reports WHERE status_resolved = 3) as dismissed
         FROM users
+        WHERE isPendingResident = 0
         ");
         return $view;
     }
