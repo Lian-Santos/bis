@@ -663,14 +663,6 @@ class UserController extends Controller
         'success' => true,
        ]);
     }
-    public function changePassword(Request $request)
-    {
-        $otp = $request->otp;
-        $email = $request->email;
-        $new_password = $request->new_password;
-
-        $check_otp = 
-    }
     public function testEmail()
     {
         Mail::to('bisappct@gmail.com')->send(new WelcomeEmail([
