@@ -619,7 +619,6 @@ class UserController extends Controller
                 'msg' => 'OTP has been sent to email'
             ]);
         }
-        return 'hi';
         $user_first_name = $user_details[0]->first_name;
         $user_last_name = $user_details[0]->last_name;
         $user_id = $user_details[0]->id;
