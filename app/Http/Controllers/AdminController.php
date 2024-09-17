@@ -70,17 +70,22 @@ class AdminController extends Controller
     }
     public function dashboardView()
     {
+        //Statuses = 0 Ongoing
+        //Statuses = 1 Settled
+        //Statuses = 2 Unresolved
+        //Statuses = 3 Dismissed
         $view = DB::select("SELECT
         count(id) as count_of_residents,
         sum(CASE WHEN male_female = '0' THEN 1 ELSE 0 END) as males,
         sum(CASE WHEN male_female = '1' THEN 1 ELSE 0 END) as females,
         sum(CASE WHEN (DATE_FORMAT(FROM_DAYS(DATEDIFF(NOW(), birthday )), '%Y') + 0) >= 60 THEN 1 ELSE 0 END ) as count_of_seniors,
-        0 as schedules,
-        0 as unresolved,
-        0 as ongoing,
-        0 as settled,
-        0 as dismissed
+        (SELECT count(id) FROM appointments) as schedules,
+        (SELECT count(id) FROM blotter_reports WHERE status_resolved = 0) as ongoing,
+        (SELECT count(id) FROM blotter_reports WHERE status_resolved = 1) as settled,
+        (SELECT count(id) FROM blotter_reports WHERE status_resolved = 2) as unresolved,
+        (SELECT count(id) FROM blotter_reports WHERE status_resolved = 3) as dismissed
         FROM users
+        WHERE isPendingResident = 0
         ");
         return $view;
     }
@@ -160,6 +165,7 @@ class AdminController extends Controller
             $search_value = "AND (u.first_name like '%$request->search_value%' OR ".
             "u.middle_name like '%$request->search_value%' OR " .
             "u.last_name like '%$request->search_value%' OR " .
+            "apt.id = '$request->search_value' OR " .
             "apt.otp_used like '%$request->search_value%'" .
             
             ")";
@@ -247,5 +253,60 @@ class AdminController extends Controller
                 FROM supporting_files
                 $filter_value
             ");
+    }
+    public function viewAdminLogs(Request $request)
+    {
+
+        $item_per_page_limit ="";
+        $item_per_page = "";
+        $offset = 0;
+        $page_number = $request->page_number;
+        if($request->item_per_page)
+        {
+            $item_per_page = $request->item_per_page;
+            $offset = $item_per_page * ($page_number - 1);
+            $item_per_page_limit = "LIMIT $request->item_per_page";
+        }
+        $offset_value = '';
+        if($offset != 0)
+        {
+            $offset_value = 'OFFSET ' . ($item_per_page * ($page_number - 1));
+        }
+        $search_value = '';
+        if($request->search_value)
+        {
+            $search_value = "AND (au.first_name like '%$request->search_value%' OR ".
+            "au.middle_name like '%$request->search_value%' OR " .
+            "au.last_name like '%$request->search_value%' OR al.log_details like '%$request->search_value%')";
+        }
+
+        $data = DB::select("SELECT
+            al.id,
+            CONCAT(au.first_name, (CASE WHEN au.middle_name = '' THEN '' ELSE ' ' END),au.middle_name,' ',au.last_name) as admin_name,
+            al.action_taker_id,
+            al.action_type,
+            al.action_target_id,
+            al.log_details,
+            al.created_at
+            FROM audit_logs as al
+            LEFT JOIN users as au on au.id = al.action_taker_id
+            WHERE al.id > 0
+            $search_value
+            ORDER BY created_at DESC, al.id DESC
+            $item_per_page_limit
+            $offset_value
+        ");
+
+        $total_pages = DB::select("SELECT
+        count(al.id) as page_count
+        FROM audit_logs as al
+        LEFT JOIN users as au on au.id = al.action_taker_id
+        WHERE al.id > 0
+        $search_value
+        ORDER BY al.created_at DESC, al.id DESC
+        ")[0]->page_count;
+        
+        $total_pages = ceil($total_pages/$item_per_page);
+        return response()->json(['data'=>$data,'current_page'=>$page_number,'total_pages'=>$total_pages],200);
     }
 }

@@ -108,11 +108,16 @@ class HistoryController extends Controller
 
         $blotters = DB::select("SELECT
         br.id as 'No.',
-        br.complainee_name as 'Complainee',
+        CASE WHEN br.complainee_name IS NULL THEN CONCAT(ceu.first_name, (CASE WHEN ceu.middle_name = '' THEN '' ELSE ' ' END),ceu.middle_name,' ',ceu.last_name) ELSE br.complainee_name END as Complainee,
         br.complaint_remarks as Remarks,
-        CASE WHEN br.status_resolved = 0 THEN 'Ongoing' ELSE 'Resolved' END as Status,
+        CASE 
+        WHEN br.status_resolved = 0 THEN 'Ongoing'
+        WHEN br.status_resolved = 1 THEN 'Settled'
+        WHEN br.status_resolved = 2 THEN 'Unresolved'
+        WHEN br.status_resolved = 3 THEN 'Dismissed'
+        END as Status,
         br.created_at as 'Requested On',
-        br.complainant_name as Complainant,
+        CASE WHEN br.complainant_name IS NULL THEN CONCAT(cau.first_name, (CASE WHEN cau.middle_name = '' THEN '' ELSE ' ' END),cau.middle_name,' ',cau.last_name) ELSE br.complainant_name END as Complainant,
         CONCAT(cu.first_name, (CASE WHEN cu.middle_name = '' THEN '' ELSE ' ' END),cu.middle_name,' ',cu.last_name) as 'Admin Name'
 
         FROM(
@@ -120,6 +125,8 @@ class HistoryController extends Controller
         FROM blotter_reports
         ) as br
         LEFT JOIN users as cu on cu.id = br.admin_id
+        LEFT JOIN users as ceu on ceu.id = br.complainee_id
+        LEFT JOIN users as cau on cau.id = br.complainant_id
         $search_value
         ORDER BY br.id DESC
         ");

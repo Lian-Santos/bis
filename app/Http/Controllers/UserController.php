@@ -9,7 +9,9 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\WelcomeEmail;
 use App\Mail\OTPEmail;
 use App\Mail\CreatedAppointmentMail;
+use App\Mail\DynamicMail;
 use Illuminate\Support\Facades\Storage;
+require_once app_path('Helpers/helpers.php');
 use DB;
 
 class UserController extends Controller
@@ -71,6 +73,7 @@ class UserController extends Controller
 
         // Insert and retrieve the ID
         $user_id = DB::table('users')->insertGetId($insertData);
+        createAuditLog(session('UserId'),'User Details Added',$user_id,'added');
         $date_now = date('Y-m-d H:i:s');
         DB::statement("INSERT
         INTO user_roles (user_id,role_id)
@@ -160,6 +163,7 @@ class UserController extends Controller
             VALUES('$user_id','0','$date_now','$file->data','$file->file_name')
             ");
         }
+
         DB::statement("INSERT
         INTO user_roles (user_id,role_id)
         SELECT
@@ -168,6 +172,22 @@ class UserController extends Controller
         FROM users as us
         where us.email = '$request->email'
         ");
+        $first_name = $request->first_name;
+        $subject  = 'Your Resident Account Is Now Pending';
+        $content  = "Greetings $first_name, <br><br>";
+        $content .= "Your Resident Account is now pending. Please visit the barangay office with the hard copy of your uploaded document to have an admin approve your account.";
+        DB::table('users')
+            ->where('id','=',$request->user_id)
+            ->update([
+                'isPendingResident' => 0
+            ]);
+        Mail::to($request->email)
+            ->cc(['bc00005rc@gmail.com'])
+            ->send(new DynamicMail([
+            'subject' => $subject,
+            'content' => $content,
+            'receiver' => $request->email
+        ]));
         if($request->file)
         {
             $path = Storage::disk('s3')->put('bis',$request->file('file_upload'));
@@ -264,7 +284,8 @@ class UserController extends Controller
         return response()->json([
             'access_token' => $token_value,
             'success' => true,
-            'testPush' => 'hi'
+            'testPush' => 'hi',
+            'user_id' => $user_details[0]->id
         ],200);
     }
     public function getUserDetails()
@@ -288,7 +309,37 @@ class UserController extends Controller
     }
     public function viewAllUsers(Request $request)
     {
-        
+        $isRegisteredFilter = '';
+        $isRegisteredFilter2 = '';
+        if($request->blotter_view == 1)
+        {
+            $search_value = '';
+            !!$request->search_value ? $search_value = " WHERE CONCAT(u.first_name, (CASE WHEN u.middle_name = '' THEN '' ELSE ' ' END),u.middle_name,' ',u.last_name)
+                like '%$request->search_value%'" : '';
+            $users = DB::select("SELECT
+                u.id as user_id,
+                CONCAT(
+                u.first_name, (CASE WHEN u.middle_name = '' THEN '' ELSE ' ' END),u.middle_name,' ',u.last_name,
+                ' | ',
+                DATE_FORMAT(u.birthday, '%Y-%m-%d'),
+                ' | ',
+                u.email
+                ) as user
+                FROM users as u
+                $search_value
+            ");
+            return $users;
+        }
+        if($request->isPendingResident == '1')
+        {
+            $isRegisteredFilter = ' AND u.isPendingResident = 1';
+            $isRegisteredFilter2 = ' AND isPendingResident = 1';
+        }
+        else if( $request->isPendingResident == '0')
+        {
+            $isRegisteredFilter = ' AND u.isPendingResident = 0';
+            $isRegisteredFilter2 = ' AND isPendingResident = 0';
+        }
         $user_id = session("UserId");
         /*
         $item_per_page = $request->item_per_page;
@@ -341,6 +392,7 @@ class UserController extends Controller
         CASE WHEN u.middle_name IS NULL THEN '' ELSE u.middle_name END as middle_name,
         u.last_name,
         u.civil_status_id,
+        (SELECT COUNT(id) FROM appointments WHERE user_id = u.id ) as appointments_made,
         ct.civil_status_type,
         u.male_female,
         u.birthday,
@@ -371,6 +423,7 @@ class UserController extends Controller
         FROM users
         WHERE id != '$user_id'
         $search_value
+        $isRegisteredFilter2
         ORDER BY isPendingResident DESC,id ASC
         $item_per_page_limit
         $offset_value
@@ -403,8 +456,9 @@ class UserController extends Controller
         }
         $total_pages = DB::select("SELECT
         count(id) as page_count
-        FROM users
-        WHERE id != '$user_id'
+        FROM users as u
+        WHERE u.id != '$user_id'
+        $isRegisteredFilter
         $search_value
         ORDER BY id
         ")[0]->page_count;
@@ -462,6 +516,7 @@ class UserController extends Controller
         $update_string
         WHERE id = '$user_id'
         ");
+        createAuditLog(session('UserId'),'User Details Updated',$request->id,'updated');
         return response()->json([
             'msg' => 'Resident official record has been changed',
             'success' => true
@@ -481,6 +536,7 @@ class UserController extends Controller
                 'success' => false
             ],401);
         }
+        createAuditLog(session('UserId'),'User Details Deleted',$request->user_id,'deleted');
         DB::statement("DELETE
         FROM users
         WHERE id = '$user_id'
@@ -529,10 +585,46 @@ class UserController extends Controller
                 'error_msg' => 'A user with this email and birthday does not exist'
             ]);
         }
+        if($request->changePassword == '1')
+        {
+            if($user_details[0]->assignable_admin == 1)
+            {
+                return response()->json([
+                    'error_msg' => 'User is not an admin',
+                    'error' => true,
+                    'success' => false
+                ]);
+            }
+            $first_name = $user_details[0]->first_name;
+            $otp = $this->generateOTPString(6);
+            $user_id = $user_details[0]->id;
+            DB::statement("INSERT INTO
+            otps
+            (otp,user_id,status,expires_at,change_password)
+            VALUES
+            ('$otp','$user_id',1,date_add('$current_date_time',interval 5 minute),1)
+            ");
+            $subject  = 'Here is your change password OTP';
+            $content  = "Greetings $first_name, <br><br>";
+            $content .= "Your OTP to change your password is $otp . Please do not share this with anyone else.";
+            Mail::to($user_details[0]->Email)
+                ->cc(['bc00005rc@gmail.com'])
+                ->send(new DynamicMail([
+                'subject' => $subject,
+                'content' => $content,
+                'receiver' => $user_details[0]->Email
+            ]));
+            return response()->json([
+                'success' => true,
+                'msg' => 'OTP has been sent to email'
+            ]);
+        }
         $user_first_name = $user_details[0]->first_name;
         $user_last_name = $user_details[0]->last_name;
+        $user_id = $user_details[0]->id;
         $blotter_info = DB::table('blotter_reports')
-            ->whereRaw("complainee_name like '%$user_first_name%' AND complainee_name like '%$user_last_name%' AND status_resolved = 0")
+            //->whereRaw("complainee_name like '%$user_first_name%' AND complainee_name like '%$user_last_name%' AND status_resolved IN ('0','2')")
+            ->whereRaw("complainee_id = '$user_id'")
             ->get();
         if(count($blotter_info) > 0)
         {
@@ -719,6 +811,19 @@ class UserController extends Controller
             return response()->json([
                 'error' => true,
                 'error_msg' => 'There are no files attached',
+                'success' => false
+            ],200);
+        }
+        $count_schedules = DB::select("SELECT
+        COUNT(id) as count
+        FROM appointments
+        WHERE schedule_date = '$request->schedule_date'
+        ");
+        if($count_schedules[0]->count >= 50)
+        {
+            return response()->json([
+                'error' => true,
+                'error_msg' => 'The slots for your selected date are full. Please select another date.',
                 'success' => false
             ],200);
         }

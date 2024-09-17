@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('supporting_files', function (Blueprint $table) {
+        Schema::create('audit_logs', function (Blueprint $table) {
             $table->id();
-            $table->string('user_id');
-            $table->text('appointment_id');
-            $table->longText('base64_file')->nullable();
-            $table->string('file_name')->nullable();
-            $table->timestamp('created_at');
+            $table->integer('action_taker_id')->nullable();
+            $table->text('action_type')->nullable();
+            $table->integer('action_target_id')->nullable();
+            $table->text('log_details')->nullable();
+            $table->timestamps();
         });
     }
 
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('supporting_files');
+        Schema::dropIfExists('audit_logs');
     }
 };
