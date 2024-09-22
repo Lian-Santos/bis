@@ -556,7 +556,7 @@ class UserController extends Controller
     public function generateOTP(Request $request)
     {
         $current_date_time = date('Y-m-d H:i:s');
-        if($request->birthday != '' || is_null($request->birthday))
+        if($request->birthday != '' || !is_null($request->birthday))
         {
             $user_details = DB::select("SELECT
             u.id,
@@ -611,7 +611,7 @@ class UserController extends Controller
                 'error_msg' => 'A user with this email and birthday does not exist'
             ]);
         }
-        if($request->changePassword == '1')
+        if($request->change_password == '1')
         {
             if($user_details[0]->assignable_admin == 1)
             {
