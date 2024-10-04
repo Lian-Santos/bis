@@ -131,6 +131,29 @@ class BlotterController extends Controller
         }
             */
 
+        //Statuses = 0 Ongoing
+        //Statuses = 1 Settled
+        //Statuses = 2 Unresolved
+        //Statuses = 3 Dismissed
+        $dashboard_clause = '';
+        $dashboard_filter = $request->dashboard_filter;
+        if($dashboard_filter == 'ongoing')
+        {
+            $dashboard_clause = "AND br.status_resolved = 0";
+        }
+        if($dashboard_filter == 'settled')
+        {
+            $dashboard_clause = "AND br.status_resolved = 1";
+        }
+        if($dashboard_filter == 'unresolved')
+        {
+            $dashboard_clause = "AND br.status_resolved = 2";
+        }
+        if($dashboard_filter == 'dismissed')
+        {
+            $dashboard_clause = "AND br.status_resolved = 3";
+        }
+        $string = "WHERE br.id > 0";
         $item_per_page_limit ="";
         $item_per_page = "";
         $offset = 0;
@@ -150,8 +173,7 @@ class BlotterController extends Controller
         if($request->search_value)
         {
             $search_value = 
-            "WHERE
-            complainee_name like '%$request->search_value%' OR ".
+            "AND (complainee_name like '%$request->search_value%' OR ".
 
             "complainant_name like '%$request->search_value%' OR ".
 
@@ -165,6 +187,8 @@ class BlotterController extends Controller
 
             "br.complainee_name like '%$request->search_value%' OR ".
             "br.complainant_name like '%$request->search_value%'";
+            $search_value = rtrim($search_value,'OR');
+            $search_value = $search_value . ')';
         }
 
 
@@ -191,7 +215,9 @@ class BlotterController extends Controller
         LEFT JOIN users as au on au.id = br.admin_id
         LEFT JOIN users as ceu on ceu.id = br.complainee_id
         LEFT JOIN users as cau on cau.id = br.complainant_id
+        $string
         $search_value
+        $dashboard_clause
         ORDER BY br.id DESC
         $item_per_page_limit
         $offset_value
@@ -210,7 +236,9 @@ class BlotterController extends Controller
         LEFT JOIN users as au on au.id = br.admin_id
         LEFT JOIN users as ceu on ceu.id = br.complainee_id
         LEFT JOIN users as cau on cau.id = br.complainant_id
+        $string
         $search_value
+        $dashboard_clause
         ORDER BY br.id DESC
         ")[0]->page_count;
         $total_pages = ceil($total_pages/$item_per_page);
